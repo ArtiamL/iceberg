@@ -1,31 +1,47 @@
-use std::fmt::{Display, Formatter, Result};
+pub mod cli;
+pub mod entry;
 
-use chrono::{DateTime, Utc};
+pub use cli::{Cli, Commands};
+pub use entry::Entry;
 
-pub struct Entry {
-    date: DateTime<Utc>,
-    title: String,
-    info: Option<String>,
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-impl Entry {
-    pub fn new(title: String, info: Option<String>) -> Self {
-        Self {
-            date: Utc::now(),
-            title,
-            info,
-        }
+    use clap::Parser;
+
+    #[test]
+    fn add_multi_word_title() {
+        let args = vec!["iceberg", "add", "test title"];
+
+        let parsed = Cli::try_parse_from(args).expect("Parsing should have succeeded!");
+
+        assert!(matches!(
+            parsed.command,
+            Commands::Add {
+                title,
+                info: _,
+                is_complete: _,
+            } if title == "test title"
+        ));
     }
-}
 
-impl Display for Entry {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let pattern = "%Y-%m-%d %H:%M:%S";
-        let date_formatted = self.date.format(pattern).to_string();
+    #[test]
+    fn title_is_word() {
+        let args = vec!["iceberg", "add", "test"];
 
-        match &self.info {
-            Some(details) => write!(f, "{} - [{}]: {}", date_formatted, self.title, details),
-            None => write!(f, "{} - [{}]", date_formatted, self.title),
-        }
+        let parsed = Cli::try_parse_from(args).expect("Parsing should have succeeded!");
+
+        assert!(matches!(
+                parsed.command,
+                Commands::Add {
+                    title,
+                    info: _,
+                    is_complete: _,
+                } if title == "test"
+        ));
     }
+
+    #[test]
+    fn 
 }

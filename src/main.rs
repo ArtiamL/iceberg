@@ -1,32 +1,18 @@
-use clap::{Parser, Subcommand};
-
-use iceberg::Entry;
-
-#[derive(Parser)]
-#[command(
-    name = "iceberg",
-    version = "0.1.0", 
-    about = "That's just the tip of the iceberg!",
-    long_about = None)]
-struct Cli {
-    #[command(subcommand)]
-    command: Commands,
-}
-
-#[derive(Subcommand)]
-enum Commands {
-    Add { title: String, info: Option<String> },
-    Remove { title: String },
-    List,
-}
+use clap::Parser;
+use iceberg::{Cli, Commands, Entry};
 
 fn main() {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Add { title, info } => {
-            let new_entry = Entry::new(title, info);
+        Commands::Add {
+            title,
+            info,
+            is_complete,
+        } => {
+            let new_entry = Entry::new(title, info, is_complete);
             println!("Added new item:");
+            println!("{new_entry:#?}");
             println!("{new_entry}");
         }
         Commands::Remove { title } => println!("Removing title: {title}"),
