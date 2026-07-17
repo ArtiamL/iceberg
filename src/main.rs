@@ -12,7 +12,7 @@ fn main() {
         } => {
             let new_entry = Entry::new(title, info, is_complete);
             println!("Added new item:");
-            println!("{new_entry:#?}");
+            // println!("{new_entry:#?}");
             println!("{new_entry}");
         }
         Commands::Remove { title } => println!("Removing title: {title}"),

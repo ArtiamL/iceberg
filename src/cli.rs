@@ -1,6 +1,6 @@
 pub use clap::{Parser, Subcommand};
 
-#[derive(Parser)]
+#[derive(Parser, Debug)]
 #[command(
     name = "iceberg",
     version = "0.1.0", 
@@ -11,7 +11,7 @@ pub struct Cli {
     pub command: Commands,
 }
 
-#[derive(Subcommand)]
+#[derive(Subcommand, Debug)]
 pub enum Commands {
     Add {
         title: String,

@@ -1,5 +1,5 @@
-use std::fmt::{Display, Formatter, Result};
 use chrono::{DateTime, Utc};
+use std::fmt::{Display, Formatter, Result};
 
 #[derive(Debug)]
 pub struct Entry {
@@ -30,7 +30,7 @@ impl Display for Entry {
         match &self.info {
             Some(details) => write!(
                 f,
-                "[{}]    {} - [{}]:\n{}",
+                "[{}]    {} - [{}]:\n\t{}",
                 is_complete, date_formatted, self.title, details
             ),
             None => write!(
@@ -41,4 +41,3 @@ impl Display for Entry {
         }
     }
 }
-

@@ -10,11 +10,13 @@ mod tests {
 
     use clap::Parser;
 
+    const EXPECT_MSG: &str = "Parsing should have succeeded!";
+
     #[test]
     fn add_multi_word_title() {
         let args = vec!["iceberg", "add", "test title"];
 
-        let parsed = Cli::try_parse_from(args).expect("Parsing should have succeeded!");
+        let parsed = Cli::try_parse_from(args).expect(EXPECT_MSG);
 
         assert!(matches!(
             parsed.command,
@@ -27,10 +29,10 @@ mod tests {
     }
 
     #[test]
-    fn title_is_word() {
+    fn add_single_word_title() {
         let args = vec!["iceberg", "add", "test"];
 
-        let parsed = Cli::try_parse_from(args).expect("Parsing should have succeeded!");
+        let parsed = Cli::try_parse_from(args).expect(EXPECT_MSG);
 
         assert!(matches!(
                 parsed.command,
@@ -43,5 +45,40 @@ mod tests {
     }
 
     #[test]
-    fn 
+    fn add_no_title() {
+        let args = vec!["iceberg", "add"];
+
+        let parsed = Cli::try_parse_from(args);
+        assert!(parsed.is_err());
+
+        let err = parsed.unwrap_err();
+        assert_eq!(err.kind(), clap::error::ErrorKind::MissingRequiredArgument);
+    }
+
+    #[test]
+    fn add_info() {
+        let args = vec!["iceberg", "add", "title", "--info", "test info"];
+
+        let parsed = Cli::try_parse_from(args).expect(EXPECT_MSG);
+
+        assert!(matches!(
+                parsed.command,
+                Commands::Add {
+                    title: _,
+                    info: Some(info),
+                    is_complete: _,
+                } if info == "test info"
+        ));
+    }
+
+    #[test]
+    fn add_no_info() {
+        let args = vec!["iceberg", "add", "title", "--info"];
+
+        let parsed = Cli::try_parse_from(args);
+        assert!(parsed.is_err());
+
+        let err = parsed.unwrap_err();
+        assert_eq!(err.kind(), clap::error::ErrorKind::InvalidValue);
+    }
 }
