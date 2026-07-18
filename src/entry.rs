@@ -1,29 +1,47 @@
 use chrono::{DateTime, Utc};
-use std::fmt::{Display, Formatter, Result};
+use core::result::Result;
+use std::{
+    cmp::Ordering,
+    fmt::{Display, Formatter},
+};
 
-#[derive(Debug)]
+use crate::CliError::{self, ValidationError};
+
+#[derive(Debug, Eq, PartialEq)]
 pub struct Entry {
-    date: DateTime<Utc>,
+    timestamp: DateTime<Utc>,
     title: String,
     info: Option<String>,
     is_complete: bool,
 }
 
 impl Entry {
-    pub fn new(title: String, info: Option<String>, is_complete: bool) -> Self {
-        Self {
-            date: Utc::now(),
+    pub fn new(title: String, info: Option<String>, is_complete: bool) -> Result<Self, CliError> {
+        if title.trim().is_empty() {
+            return Err(ValidationError("Title is empty!".to_string()));
+        };
+
+        if let Some(info_str) = &info {
+            if info_str.trim().is_empty() {
+                return Err(ValidationError(
+                    "Info description cannot contain only blank whitespace!".to_string(),
+                ));
+            }
+        }
+
+        Ok(Entry {
+            timestamp: Utc::now(),
             title,
             info,
             is_complete,
-        }
+        })
     }
 }
 
 impl Display for Entry {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let pattern = "%Y-%m-%d %H:%M:%S";
-        let date_formatted = self.date.format(pattern).to_string();
+        let date_formatted = self.timestamp.format(pattern).to_string();
 
         let is_complete = if self.is_complete { "🗸" } else { "✗" };
 
@@ -39,5 +57,17 @@ impl Display for Entry {
                 is_complete, date_formatted, self.title
             ),
         }
+    }
+}
+
+impl Ord for Entry {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.timestamp.cmp(&other.timestamp)
+    }
+}
+
+impl PartialOrd for Entry {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }

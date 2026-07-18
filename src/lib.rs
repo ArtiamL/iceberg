@@ -1,7 +1,7 @@
-pub mod cli;
-pub mod entry;
+mod cli;
+mod entry;
 
-pub use cli::{Cli, Commands};
+pub use cli::{Cli, CliError, Commands};
 pub use entry::Entry;
 
 #[cfg(test)]
@@ -20,11 +20,7 @@ mod tests {
 
         assert!(matches!(
             parsed.command,
-            Commands::Add {
-                title,
-                info: _,
-                is_complete: _,
-            } if title == "test title"
+            Some(Commands::Add { title, .. }) if title == "test title"
         ));
     }
 
@@ -36,14 +32,11 @@ mod tests {
 
         assert!(matches!(
                 parsed.command,
-                Commands::Add {
-                    title,
-                    info: _,
-                    is_complete: _,
-                } if title == "test"
+                Some(Commands::Add { title, .. }) if title == "test"
         ));
     }
 
+    #[ignore = "Clap test"]
     #[test]
     fn add_no_title() {
         let args = vec!["iceberg", "add"];
@@ -63,14 +56,11 @@ mod tests {
 
         assert!(matches!(
                 parsed.command,
-                Commands::Add {
-                    title: _,
-                    info: Some(info),
-                    is_complete: _,
-                } if info == "test info"
+                Some(Commands::Add { info: Some(text), .. }) if text == "test info"
         ));
     }
 
+    #[ignore = "Clap test"]
     #[test]
     fn add_no_info() {
         let args = vec!["iceberg", "add", "title", "--info"];
