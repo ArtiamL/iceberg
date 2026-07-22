@@ -38,6 +38,7 @@ pub enum Commands {
 pub enum CliError {
     ValidationError(String),
     IoError(std::io::Error),
+    JsonError(serde_json::Error),
 }
 
 impl std::error::Error for CliError {}
@@ -48,11 +49,18 @@ impl From<std::io::Error> for CliError {
     }
 }
 
+impl From<serde_json::Error> for CliError {
+    fn from(err: serde_json::Error) -> Self {
+        CliError::JsonError(err)
+    }
+}
+
 impl Display for CliError {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
-            CliError::ValidationError(msg) => write!(f, "Validation Error: {msg}"),
+            CliError::ValidationError(err) => write!(f, "Validation Error: {err}"),
             CliError::IoError(err) => write!(f, "I/O Error: {err}"),
+            CliError::JsonError(err) => write!(f, "Json conversion error: {err}"),
         }
     }
 }

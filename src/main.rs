@@ -1,8 +1,19 @@
+use std::process;
+
 use clap::Parser;
+
 use iceberg::{Cli, CliError, Commands, Entry};
 
 // TODO: Do I need Result from main?
-fn main() -> Result<(), CliError> {
+fn main() {
+    if let Err(err) = run() {
+        eprintln!("{err}");
+
+        process::exit(1);
+    }
+}
+
+fn run() -> Result<(), CliError> {
     let mut entries: Vec<Entry> = Vec::new();
 
     let cli = Cli::parse();
@@ -25,18 +36,18 @@ fn main() -> Result<(), CliError> {
             // println!("{new_entry:#?}");
             println!("{new_entry}");
             entries.push(new_entry);
-
-            Ok(())
         }
         Commands::Remove { title } => {
             println!("Removing title: {title}");
-            Ok(())
         }
         Commands::List => {
             view_entries(&entries);
-            Ok(())
         }
     }
+
+    serialize_to_file(&entries)?;
+
+    Ok(())
 }
 
 //stubs
@@ -60,4 +71,12 @@ fn load_dashboard() {
     //     if
     //     continue;
     // }
+}
+
+fn serialize_to_file(entries: &[Entry]) -> Result<(), CliError> {
+    let json = serde_json::to_string(&entries)?;
+
+    todo!("Implement file saving");
+
+    Ok(())
 }

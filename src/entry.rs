@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use core::result::Result;
+use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering,
     fmt::{Display, Formatter},
@@ -7,7 +8,14 @@ use std::{
 
 use crate::CliError::{self, ValidationError};
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(
+    Debug,
+    Eq,
+    PartialEq,
+    // Serde
+    Serialize,
+    Deserialize,
+)]
 pub struct Entry {
     timestamp: DateTime<Utc>,
     title: String,
