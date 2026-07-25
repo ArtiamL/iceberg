@@ -1,5 +1,6 @@
 mod cli;
 mod entry;
+pub mod filesystem;
 
 pub use cli::{Cli, CliError, Commands};
 pub use entry::Entry;

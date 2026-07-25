@@ -2,6 +2,7 @@ use std::process;
 
 use clap::Parser;
 
+use iceberg::filesystem::{read, write};
 use iceberg::{Cli, CliError, Commands, Entry};
 
 // TODO: Do I need Result from main?
