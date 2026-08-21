@@ -2,7 +2,7 @@ use std::process;
 
 use clap::Parser;
 
-use iceberg::filesystem::{read, write};
+// use iceberg::filesystem::{read, write};
 use iceberg::{Cli, CliError, Commands, Entry};
 
 // TODO: Do I need Result from main?
@@ -16,6 +16,7 @@ fn main() {
 
 fn run() -> Result<(), CliError> {
     let mut entries: Vec<Entry> = Vec::new();
+    let next_id = entries.iter().map(|e| e.id).max().unwrap_or(0) + 1;
 
     let cli = Cli::parse();
 
@@ -27,12 +28,8 @@ fn run() -> Result<(), CliError> {
     };
 
     match command {
-        Commands::Add {
-            title,
-            info,
-            is_complete,
-        } => {
-            let new_entry = Entry::new(title, info, is_complete)?;
+        Commands::Add { title, info } => {
+            let new_entry = Entry::new(next_id, title, info)?;
             println!("Added new item:");
             // println!("{new_entry:#?}");
             println!("{new_entry}");

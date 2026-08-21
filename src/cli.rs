@@ -20,13 +20,10 @@ pub enum Commands {
 
         #[arg(short, long, help = "requires information (\"\")")]
         info: Option<String>,
-
         // TODO:
         // #[arg(short, long)]
         // date: Option<T>,
         //
-        #[arg(long)]
-        is_complete: bool,
     },
     Remove {
         title: String,

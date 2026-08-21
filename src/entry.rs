@@ -17,6 +17,7 @@ use crate::CliError::{self, ValidationError};
     Deserialize,
 )]
 pub struct Entry {
+    pub id: u32,
     timestamp: DateTime<Utc>,
     title: String,
     info: Option<String>,
@@ -24,7 +25,7 @@ pub struct Entry {
 }
 
 impl Entry {
-    pub fn new(title: String, info: Option<String>, is_complete: bool) -> Result<Self, CliError> {
+    pub fn new(id: u32, title: String, info: Option<String>) -> Result<Self, CliError> {
         if title.trim().is_empty() {
             return Err(ValidationError("Title is empty!".to_string()));
         };
@@ -38,10 +39,11 @@ impl Entry {
         }
 
         Ok(Entry {
+            id,
             timestamp: Utc::now(),
             title,
             info,
-            is_complete,
+            is_complete: false,
         })
     }
 }
