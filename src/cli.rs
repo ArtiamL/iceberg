@@ -35,6 +35,7 @@ pub enum Commands {
 pub enum CliError {
     ValidationError(String),
     IoError(std::io::Error),
+    ConfigDirNotFound,
     JsonError(serde_json::Error),
 }
 
@@ -57,6 +58,7 @@ impl Display for CliError {
         match self {
             CliError::ValidationError(err) => write!(f, "Validation Error: {err}"),
             CliError::IoError(err) => write!(f, "I/O Error: {err}"),
+            CliError::ConfigDirNotFound => write!(f, "The config directory was not found!"),
             CliError::JsonError(err) => write!(f, "Json conversion error: {err}"),
         }
     }

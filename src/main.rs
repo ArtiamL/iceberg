@@ -1,4 +1,4 @@
-use std::process;
+use std::{fs::File, io::Write, process};
 
 use clap::Parser;
 
@@ -15,7 +15,8 @@ fn main() {
 }
 
 fn run() -> Result<(), CliError> {
-    let mut entries: Vec<Entry> = Vec::new();
+    let mut entries: Vec<Entry> = Vec::new(); // Swap to unwrap_or_else/default with file
+    // read/deserialization
     let next_id = entries.iter().map(|e| e.id).max().unwrap_or(0) + 1;
 
     let cli = Cli::parse();
@@ -74,7 +75,22 @@ fn load_dashboard() {
 fn serialize_to_file(entries: &[Entry]) -> Result<(), CliError> {
     let json = serde_json::to_string(&entries)?;
 
-    todo!("Implement file saving");
+    let data_dir = dirs::data_local_dir()
+        .ok_or(CliError::ConfigDirNotFound)?
+        .join("iceberg");
+
+    std::fs::create_dir_all(&data_dir)?;
+
+    let mut file = File::create(data_dir.join("entries.json"))?;
+    file.write_all(json.as_bytes())?;
 
     Ok(())
+}
+
+fn deserialize_from_file() -> Result<Entry, CliError> {
+    let data_dir = dirs::data_local_dir()
+        .ok_or(CliError::ConfigDirNotFound)?
+    .join("iceberg");
+
+    let json = File::read
 }

@@ -8,6 +8,12 @@ use std::{
 
 use crate::CliError::{self, ValidationError};
 
+// #[derive(Debug, Serialize, Deserialize)]
+// enum CompletionState {
+//     Complete,
+//     Incomplete,
+// }
+
 #[derive(
     Debug,
     Eq,
@@ -21,13 +27,14 @@ pub struct Entry {
     timestamp: DateTime<Utc>,
     title: String,
     info: Option<String>,
+    // is_complete: CompletionState,
     is_complete: bool,
 }
 
 impl Entry {
     pub fn new(id: u32, title: String, info: Option<String>) -> Result<Self, CliError> {
         if title.trim().is_empty() {
-            return Err(ValidationError("Title is empty!".to_string()));
+            return Err(ValidationError("Title is empty!".into()));
         };
 
         if let Some(info_str) = &info {
