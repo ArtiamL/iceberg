@@ -1,4 +1,4 @@
-use std::fmt::{Display, Formatter, Result};
+use std::fmt::{Display, Formatter, Result, write};
 
 pub use clap::{Parser, Subcommand};
 
@@ -34,9 +34,10 @@ pub enum Commands {
 #[derive(Debug)]
 pub enum CliError {
     ValidationError(String),
+    EntryNotFound(String),
     IoError(std::io::Error),
-    ConfigDirNotFound,
     JsonError(serde_json::Error),
+    ConfigDirNotFound,
 }
 
 impl std::error::Error for CliError {}
@@ -57,6 +58,9 @@ impl Display for CliError {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
             CliError::ValidationError(err) => write!(f, "Validation Error: {err}"),
+            CliError::EntryNotFound(title) => {
+                write!(f, "The entry with title: {title} was not found!")
+            }
             CliError::IoError(err) => write!(f, "I/O Error: {err}"),
             CliError::ConfigDirNotFound => write!(f, "The config directory was not found!"),
             CliError::JsonError(err) => write!(f, "Json conversion error: {err}"),

@@ -25,7 +25,7 @@ use crate::CliError::{self, ValidationError};
 pub struct Entry {
     pub id: u32,
     timestamp: DateTime<Utc>,
-    title: String,
+    pub title: String,
     info: Option<String>,
     // is_complete: CompletionState,
     is_complete: bool,
@@ -40,7 +40,7 @@ impl Entry {
         if let Some(info_str) = &info {
             if info_str.trim().is_empty() {
                 return Err(ValidationError(
-                    "Info description cannot contain only blank whitespace!".to_string(),
+                    "Info description cannot contain only blank whitespace!".into(),
                 ));
             }
         }

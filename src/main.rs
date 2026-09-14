@@ -1,4 +1,8 @@
-use std::{fs::File, io::Write, process};
+use std::{
+    fs::{self, File},
+    io::{Read, Write},
+    process,
+};
 
 use clap::Parser;
 
@@ -15,8 +19,7 @@ fn main() {
 }
 
 fn run() -> Result<(), CliError> {
-    let mut entries: Vec<Entry> = Vec::new(); // Swap to unwrap_or_else/default with file
-    // read/deserialization
+    let mut entries: Vec<Entry> = deserialize_from_file().unwrap_or_default();
     let next_id = entries.iter().map(|e| e.id).max().unwrap_or(0) + 1;
 
     let cli = Cli::parse();
@@ -37,7 +40,13 @@ fn run() -> Result<(), CliError> {
             entries.push(new_entry);
         }
         Commands::Remove { title } => {
-            println!("Removing title: {title}");
+            let Some(entry) = entries.iter().position(|e| e.title == title) else {
+                return Err(CliError::EntryNotFound(title));
+            };
+            let removed = entries.remove(entry); // Decide if elem order is needed - if not use
+            // swap_remove
+            // println!("{entries:#?}");
+            println!("Removed entry:\n{removed}");
         }
         Commands::List => {
             view_entries(&entries);
@@ -87,10 +96,11 @@ fn serialize_to_file(entries: &[Entry]) -> Result<(), CliError> {
     Ok(())
 }
 
-fn deserialize_from_file() -> Result<Entry, CliError> {
+fn deserialize_from_file() -> Result<Vec<Entry>, CliError> {
     let data_dir = dirs::data_local_dir()
         .ok_or(CliError::ConfigDirNotFound)?
-    .join("iceberg");
+        .join("iceberg");
 
-    let json = File::read
+    let file_data = fs::read_to_string(data_dir.join("entries.json"))?;
+    Ok(serde_json::from_str(&file_data)?)
 }
