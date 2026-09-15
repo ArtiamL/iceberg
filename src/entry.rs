@@ -6,13 +6,7 @@ use std::{
     fmt::{Display, Formatter},
 };
 
-use crate::CliError::{self, ValidationError};
-
-// #[derive(Debug, Serialize, Deserialize)]
-// enum CompletionState {
-//     Complete,
-//     Incomplete,
-// }
+use crate::CliError;
 
 #[derive(
     Debug,
@@ -27,20 +21,19 @@ pub struct Entry {
     timestamp: DateTime<Utc>,
     title: String,
     info: Option<String>,
-    // is_complete: CompletionState,
     pub is_complete: bool,
 }
 
 impl Entry {
     pub fn new(id: u32, title: String, info: Option<String>) -> Result<Self, CliError> {
         if title.trim().is_empty() {
-            return Err(ValidationError("Title is empty!".into()));
+            return Err(CliError::ValidationError("Title is empty!".into()));
         };
 
         if let Some(info_str) = &info
             && info_str.trim().is_empty()
         {
-            return Err(ValidationError(
+            return Err(CliError::ValidationError(
                 "Info description cannot contain only blank whitespace!".into(),
             ));
         }

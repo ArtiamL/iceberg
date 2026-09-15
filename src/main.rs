@@ -1,4 +1,5 @@
 use std::{
+    fmt::format,
     fs::{self},
     io::{self, Write},
     process,
@@ -32,33 +33,43 @@ fn run() -> Result<(), CliError> {
     };
 
     match command {
+        Commands::List => {
+            view_entries(&entries);
+            Ok(())
+        }
         Commands::Add { title, info } => {
             let new_entry = Entry::new(next_id, title, info)?;
             println!("Added new item:");
             println!("{new_entry}");
             entries.push(new_entry);
+            serialize_to_file(&entries)
         }
         Commands::Remove {
             id,
             all,
             no_confirm,
         } => {
-            match (all, no_confirm) {
-                (false, _) => {
+            match (id, all, no_confirm) {
+                (Some(id), _, _) => {
+                    // id given, ignore everything else (remove only entry
+                    // with id)
                     let Some(entry) = entries.iter().position(|e| e.id == id) else {
                         return Err(CliError::EntryNotFound(id));
                     };
                     let removed = entries.remove(entry); // Decide if elem order is needed - if not use
                     // swap_remove
-                    // println!("{entries:#?}");
+
+                    serialize_to_file(&entries)?;
+
                     println!("Removed entry:\n{removed}");
+                    Ok(())
                 }
-                (true, true) => {
-                    entries.clear();
-                    println!("Cleared all entries!");
-                    return Ok(());
+                (None, false, _) => {
+                    // no id, no --all (err)
+                    Err(CliError::NoIdGivenError)
                 }
-                (true, false) => {
+                (None, true, false) => {
+                    // no id, --all given, --no-confirm not given (ask to confirm)
                     print!("Are you sure? [y/N]: ");
                     io::stdout().flush()?;
                     let mut input = String::new();
@@ -71,26 +82,34 @@ fn run() -> Result<(), CliError> {
                     }
 
                     entries.clear();
+
+                    serialize_to_file(&entries)?;
                     println!("Cleared all entries!");
-                    return Ok(());
+                    Ok(())
+                }
+                (None, true, true) => {
+                    // no id, --all given, --no-confirm given (remove everything)
+                    entries.clear();
+
+                    serialize_to_file(&entries)?;
+                    println!("Cleared all entries!");
+                    Ok(())
                 }
             }
-        }
-        Commands::List => {
-            view_entries(&entries);
         }
         Commands::Complete { id } => {
             let Some(entry) = entries.iter_mut().find(|e| e.id == id) else {
                 return Err(CliError::EntryNotFound(id));
             };
             entry.is_complete = true;
-            print!("Marked entry as complete:\n{entry}");
+
+            let msg = format!("Marked entry as complete:\n{entry}");
+            serialize_to_file(&entries)?;
+
+            println!("{msg}");
+            Ok(())
         }
     }
-
-    serialize_to_file(&entries)?;
-
-    Ok(())
 }
 
 //stubs

@@ -27,9 +27,10 @@ pub enum Commands {
     },
     #[command(visible_alias = "rm")]
     Remove {
-        id: u32,
+        id: Option<u32>,
+        #[arg(long)]
         all: bool,
-        #[arg(requires = "all")]
+        #[arg(long, requires = "all")]
         no_confirm: bool,
     },
     List,
@@ -47,6 +48,7 @@ pub enum CliError {
     JsonError(serde_json::Error),
     ConfigDirNotFound,
     NoConfirmError,
+    NoIdGivenError,
 }
 
 impl std::error::Error for CliError {}
@@ -77,6 +79,7 @@ impl Display for CliError {
             Self::ConfigDirNotFound => write!(f, "The config directory was not found!"),
             Self::JsonError(err) => write!(f, "Json conversion error: {err}"),
             Self::NoConfirmError => write!(f, "--no-confirm must be used with --all"),
+            Self::NoIdGivenError => write!(f, "No ID was given! to remove all entries use --all"),
         }
     }
 }
