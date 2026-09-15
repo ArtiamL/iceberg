@@ -53,30 +53,30 @@ impl std::error::Error for CliError {}
 
 impl From<std::io::Error> for CliError {
     fn from(err: std::io::Error) -> Self {
-        CliError::IoError(err)
+        Self::IoError(err)
     }
 }
 
 impl From<serde_json::Error> for CliError {
     fn from(err: serde_json::Error) -> Self {
-        CliError::JsonError(err)
+        Self::JsonError(err)
     }
 }
 
 impl Display for CliError {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
-            CliError::ValidationError(err) => write!(f, "Validation Error: {err}"),
-            CliError::AlreadyExists(title) => {
+            Self::ValidationError(err) => write!(f, "Validation Error: {err}"),
+            Self::AlreadyExists(title) => {
                 write!(f, "An entry with the title: '{title}' already exists")
             }
-            CliError::EntryNotFound(id) => {
+            Self::EntryNotFound(id) => {
                 write!(f, "The entry with id: {id} was not found!")
             }
-            CliError::IoError(err) => write!(f, "I/O Error: {err}"),
-            CliError::ConfigDirNotFound => write!(f, "The config directory was not found!"),
-            CliError::JsonError(err) => write!(f, "Json conversion error: {err}"),
-            CliError::NoConfirmError => write!(f, "--no-confirm must be used with --all"),
+            Self::IoError(err) => write!(f, "I/O Error: {err}"),
+            Self::ConfigDirNotFound => write!(f, "The config directory was not found!"),
+            Self::JsonError(err) => write!(f, "Json conversion error: {err}"),
+            Self::NoConfirmError => write!(f, "--no-confirm must be used with --all"),
         }
     }
 }

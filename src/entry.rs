@@ -37,12 +37,12 @@ impl Entry {
             return Err(ValidationError("Title is empty!".into()));
         };
 
-        if let Some(info_str) = &info {
-            if info_str.trim().is_empty() {
-                return Err(ValidationError(
-                    "Info description cannot contain only blank whitespace!".into(),
-                ));
-            }
+        if let Some(info_str) = &info
+            && info_str.trim().is_empty()
+        {
+            return Err(ValidationError(
+                "Info description cannot contain only blank whitespace!".into(),
+            ));
         }
 
         Ok(Entry {
