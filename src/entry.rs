@@ -25,10 +25,10 @@ use crate::CliError::{self, ValidationError};
 pub struct Entry {
     pub id: u32,
     timestamp: DateTime<Utc>,
-    pub title: String,
+    title: String,
     info: Option<String>,
     // is_complete: CompletionState,
-    is_complete: bool,
+    pub is_complete: bool,
 }
 
 impl Entry {
@@ -62,17 +62,18 @@ impl Display for Entry {
 
         let is_complete = if self.is_complete { "🗸" } else { "✗" };
 
-        match &self.info {
-            Some(details) => write!(
+        if let Some(details) = &self.info {
+            write!(
                 f,
-                "[{}]    {} - [{}]:\n\t{}",
-                is_complete, date_formatted, self.title, details
-            ),
-            None => write!(
+                "{}.\t[{}]    {} - [{}]:\n\t{}",
+                self.id, is_complete, date_formatted, self.title, details
+            )
+        } else {
+            write!(
                 f,
-                "[{}]    {} - [{}]",
-                is_complete, date_formatted, self.title
-            ),
+                "{}.\t[{}]    {} - [{}]",
+                self.id, is_complete, date_formatted, self.title
+            )
         }
     }
 }

@@ -1,6 +1,6 @@
 use std::{
-    fs::{self, File},
-    io::{Read, Write},
+    fs::{self},
+    io::{self, Write},
     process,
 };
 
@@ -35,21 +35,56 @@ fn run() -> Result<(), CliError> {
         Commands::Add { title, info } => {
             let new_entry = Entry::new(next_id, title, info)?;
             println!("Added new item:");
-            // println!("{new_entry:#?}");
             println!("{new_entry}");
             entries.push(new_entry);
         }
-        Commands::Remove { title } => {
-            let Some(entry) = entries.iter().position(|e| e.title == title) else {
-                return Err(CliError::EntryNotFound(title));
-            };
-            let removed = entries.remove(entry); // Decide if elem order is needed - if not use
-            // swap_remove
-            // println!("{entries:#?}");
-            println!("Removed entry:\n{removed}");
+        Commands::Remove {
+            id,
+            all,
+            no_confirm,
+        } => {
+            match (all, no_confirm) {
+                (false, _) => {
+                    let Some(entry) = entries.iter().position(|e| e.id == id) else {
+                        return Err(CliError::EntryNotFound(id));
+                    };
+                    let removed = entries.remove(entry); // Decide if elem order is needed - if not use
+                    // swap_remove
+                    // println!("{entries:#?}");
+                    println!("Removed entry:\n{removed}");
+                }
+                (true, true) => {
+                    entries.clear();
+                    println!("Cleared all entries!");
+                    return Ok(());
+                }
+                (true, false) => {
+                    print!("Are you sure? [y/N]: ");
+                    io::stdout().flush()?;
+                    let mut input = String::new();
+                    io::stdin().read_line(&mut input)?;
+                    let confirmed = matches!(input.trim().to_lowercase().as_str(), "y" | "yes");
+
+                    if !confirmed {
+                        println!("Cancelled.");
+                        return Ok(());
+                    }
+
+                    entries.clear();
+                    println!("Cleared all entries!");
+                    return Ok(());
+                }
+            }
         }
         Commands::List => {
             view_entries(&entries);
+        }
+        Commands::Complete { id } => {
+            let Some(entry) = entries.iter_mut().find(|e| e.id == id) else {
+                return Err(CliError::EntryNotFound(id));
+            };
+            entry.is_complete = true;
+            print!("Marked entry as complete:\n{entry}");
         }
     }
 
@@ -90,8 +125,7 @@ fn serialize_to_file(entries: &[Entry]) -> Result<(), CliError> {
 
     std::fs::create_dir_all(&data_dir)?;
 
-    let mut file = File::create(data_dir.join("entries.json"))?;
-    file.write_all(json.as_bytes())?;
+    fs::write(data_dir.join("entries.json"), json)?;
 
     Ok(())
 }

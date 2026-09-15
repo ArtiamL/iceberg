@@ -1,4 +1,4 @@
-use std::fmt::{Display, Formatter, Result, write};
+use std::fmt::{Display, Formatter, Result};
 
 pub use clap::{Parser, Subcommand};
 
@@ -25,19 +25,28 @@ pub enum Commands {
         // date: Option<T>,
         //
     },
+    #[command(visible_alias = "rm")]
     Remove {
-        title: String,
+        id: u32,
+        all: bool,
+        #[arg(requires = "all")]
+        no_confirm: bool,
     },
     List,
+    Complete {
+        id: u32,
+    },
 }
 
 #[derive(Debug)]
 pub enum CliError {
     ValidationError(String),
-    EntryNotFound(String),
+    AlreadyExists(String),
+    EntryNotFound(u32),
     IoError(std::io::Error),
     JsonError(serde_json::Error),
     ConfigDirNotFound,
+    NoConfirmError,
 }
 
 impl std::error::Error for CliError {}
@@ -58,12 +67,16 @@ impl Display for CliError {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
             CliError::ValidationError(err) => write!(f, "Validation Error: {err}"),
-            CliError::EntryNotFound(title) => {
-                write!(f, "The entry with title: {title} was not found!")
+            CliError::AlreadyExists(title) => {
+                write!(f, "An entry with the title: '{title}' already exists")
+            }
+            CliError::EntryNotFound(id) => {
+                write!(f, "The entry with id: {id} was not found!")
             }
             CliError::IoError(err) => write!(f, "I/O Error: {err}"),
             CliError::ConfigDirNotFound => write!(f, "The config directory was not found!"),
             CliError::JsonError(err) => write!(f, "Json conversion error: {err}"),
+            CliError::NoConfirmError => write!(f, "--no-confirm must be used with --all"),
         }
     }
 }
